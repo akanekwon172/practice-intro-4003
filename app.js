@@ -3,13 +3,13 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
-var helmet = require('helmet');
-var session = require('express-session');
-var passport = require('passport');
-var GitHubStrategy = require('passport-github2').Strategy;
+const helmet = require('helmet');
+const session = require('express-session');
+const passport = require('passport');
+const GitHubStrategy = require('passport-github2').Strategy;
 
-var GITHUB_CLIENT_ID = 'f756acb8748f85e2014b';
-var GITHUB_CLIENT_SECRET = '0fc57f6660bd5da78873eeacda8c131859b64f30';
+const GITHUB_CLIENT_ID = 'f756acb8748f85e2014b';
+const GITHUB_CLIENT_SECRET = '0fc57f6660bd5da78873eeacda8c131859b64f30';
 
 passport.serializeUser(function (user, done) {
   done(null, user);
@@ -33,7 +33,7 @@ passport.use(new GitHubStrategy({
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
-var photosRouter = require('./routes/photos');
+const photosRouter = require('./routes/photos');
 
 var app = express();
 app.use(helmet());
@@ -48,7 +48,13 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(session({ secret: '417cce55dcfcfaeb', resave: false, saveUninitialized: false }));
+app.use(
+  session({
+    secret: '417cce55dcfcfaeb',
+    resave: false,
+    saveUninitialized: false,
+  })
+);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -58,25 +64,31 @@ app.use('/photos', photosRouter);
 
 app.get('/auth/github',
   passport.authenticate('github', { scope: ['user:email'] }),
-  function (req, res) {});
+  function (req, res) {}
+);
 
 app.get('/auth/github/callback',
   passport.authenticate('github', { failureRedirect: '/login' }),
   function (req, res) {
     res.redirect('/');
-  });
+  }
+);
 
 app.get('/login', function (req, res) {
   res.render('login');
 });
 
-app.get('/logout', function (req, res) {
-  req.logout();
-  res.redirect('/');
+app.get('/logout', function (req, res, next) {
+  req.logout(function (err) {
+    if (err) return next(err);
+    res.redirect('/');
+  });
 });
 
 function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
+  if (req.isAuthenticated()) {
+    return next();
+  }
   res.redirect('/login');
 }
 
