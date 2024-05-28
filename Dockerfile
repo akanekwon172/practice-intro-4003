@@ -1,4 +1,4 @@
-FROM --platform=linux/x86_64 node:18.7.0-slim
+FROM node:20.11.0-slim
 
 RUN apt-get update \
 && apt-get install --no-install-recommends -y locales git procps \
